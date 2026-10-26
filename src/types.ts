@@ -10,3 +10,12 @@ export interface Roulette {
   name: string;
   items: Item[];
 }
+
+/** Everything persisted to data.json. */
+export interface AppData {
+  version: 1;
+  roulettes: Roulette[];
+  activeRouletteId: string | null;
+  sidebarOpen: boolean;
+  muted: boolean;
+}

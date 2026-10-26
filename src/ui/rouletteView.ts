@@ -6,6 +6,7 @@ import { createPlaceholder } from "./placeholder";
 /** Changes slower than this are shown sharp; faster ones get motion blur. */
 const BLUR_FREE_GAP_MS = 300;
 const FASTEST_GAP_MS = 40;
+const TOO_FEW_ITEMS_HINT = "Añade al menos 2 elementos para girar";
 
 /**
  * The item box: shows one face per item and flips between them during a spin.
@@ -24,11 +25,13 @@ export class RouletteView {
   private readonly idleFace: HTMLElement;
   private shown: HTMLElement;
   private spinning = false;
+  private tooFewHint = TOO_FEW_ITEMS_HINT;
 
   constructor(
     root: HTMLElement,
     private readonly sound: SoundPlayer,
     private readonly imageUrl: (item: Item) => string | null,
+    private readonly onSpinningChange: (spinning: boolean) => void = () => {},
   ) {
     root.innerHTML = `
       <svg class="svg-defs" aria-hidden="true">
@@ -59,9 +62,13 @@ export class RouletteView {
     return this.spinning;
   }
 
-  /** Replaces the items and resets the box to its idle "?" state. */
-  setItems(items: Item[]) {
+  /**
+   * Replaces the items and resets the box to its idle "?" state.
+   * `tooFewHint` is shown under the button while there are fewer than 2 items.
+   */
+  setItems(items: Item[], tooFewHint = TOO_FEW_ITEMS_HINT) {
     this.items = items;
+    this.tooFewHint = tooFewHint;
     for (const face of this.itemFaces) face.remove();
     this.itemFaces = items.map((item) => {
       const face = document.createElement("div");
@@ -91,6 +98,7 @@ export class RouletteView {
   async spin() {
     if (this.spinning || this.items.length < 2) return;
     this.spinning = true;
+    this.onSpinningChange(true);
     this.updateControls();
     this.winnerLabel.classList.remove("show");
     this.winnerLabel.textContent = "";
@@ -115,13 +123,14 @@ export class RouletteView {
     this.sound.result();
     this.celebrate(this.items[winner]);
     this.spinning = false;
+    this.onSpinningChange(false);
     this.updateControls();
   }
 
   private updateControls() {
     const enough = this.items.length >= 2;
     this.spinButton.disabled = this.spinning || !enough;
-    this.hint.textContent = enough ? "o pulsa Espacio" : "Añade al menos 2 elementos para girar";
+    this.hint.textContent = enough ? "o pulsa Espacio" : this.tooFewHint;
   }
 
   private showFace(face: HTMLElement) {
