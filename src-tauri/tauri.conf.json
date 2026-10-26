@@ -32,6 +32,12 @@
   "bundle": {
     "active": true,
     "targets": ["nsis"],
+    "shortDescription": "Ruleta tipo caja de objetos para elegir al azar",
+    "windows": {
+      "nsis": {
+        "languages": ["Spanish", "English"]
+      }
+    },
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

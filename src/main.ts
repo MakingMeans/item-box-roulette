@@ -152,6 +152,12 @@ function isTextInput(target: EventTarget | null): boolean {
   return target instanceof HTMLElement && (target.isContentEditable || target.matches("input, textarea, select"));
 }
 
+// The WebView's own context menu (reload, print…) makes no sense in a desktop app;
+// text fields keep it for copy/paste.
+window.addEventListener("contextmenu", (event) => {
+  if (!isTextInput(event.target)) event.preventDefault();
+});
+
 window.addEventListener("keydown", (event) => {
   if (event.code !== "Space" || event.repeat || isTextInput(event.target)) return;
   if (document.querySelector("dialog[open]")) return;
