@@ -1,5 +1,5 @@
-// spin.mp3 is a local-only asset (git-ignored). The glob resolves to nothing when the file is
-// missing, so builds without it fall back to generated sounds instead of failing.
+// The glob resolves to nothing if spin.mp3 is removed, so the app then falls back to
+// generated sounds instead of failing to build.
 const soundFiles = import.meta.glob<string>("./assets/sounds/spin.mp3", {
   eager: true,
   query: "?url",

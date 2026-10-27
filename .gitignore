@@ -18,7 +18,5 @@ Thumbs.db
 *.suo
 *.sw?
 
-# Local-only assets: not redistributable, never commit them.
-# The spin sound is bundled into the exe only when present on the build machine.
-/src/assets/sounds/spin.mp3
+# Visual reference used while designing the item box, not part of the app
 /hqdefault.jpg

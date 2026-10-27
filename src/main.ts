@@ -11,6 +11,7 @@ app.innerHTML = `
   <div class="layout">
     <aside class="sidebar" aria-label="Ruletas"></aside>
     <main class="stage">
+      <div class="stage-backdrop" aria-hidden="true"></div>
       <div class="stage-toolbar">
         <button class="icon-button sidebar-toggle" type="button"></button>
         <button class="icon-button mute-button" type="button"></button>
