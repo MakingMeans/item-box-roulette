@@ -18,4 +18,5 @@ export interface AppData {
   activeRouletteId: string | null;
   sidebarOpen: boolean;
   muted: boolean;
+  spinSeconds: number;
 }

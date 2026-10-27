@@ -1,4 +1,5 @@
 import * as api from "./api";
+import { MAX_SPIN_SECONDS, MIN_SPIN_SECONDS } from "./sound";
 import type { AppData, Item, Roulette } from "./types";
 
 const SAMPLE_ITEMS = ["Stranger Things", "The Office", "Breaking Bad", "Dark", "Arcane"];
@@ -9,8 +10,17 @@ function sampleData(): AppData {
     name: "Series",
     items: SAMPLE_ITEMS.map((name) => ({ id: crypto.randomUUID(), name, image: null })),
   };
-  return { version: 1, roulettes: [roulette], activeRouletteId: roulette.id, sidebarOpen: true, muted: false };
+  return {
+    version: 1,
+    roulettes: [roulette],
+    activeRouletteId: roulette.id,
+    sidebarOpen: true,
+    muted: false,
+    spinSeconds: MIN_SPIN_SECONDS,
+  };
 }
+
+const clampSpinSeconds = (s: number) => Math.min(MAX_SPIN_SECONDS, Math.max(MIN_SPIN_SECONDS, s));
 
 const isObject = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null;
 
@@ -29,7 +39,14 @@ function normalize(raw: unknown): AppData {
   const activeRouletteId = roulettes.some((r) => r.id === d.activeRouletteId)
     ? (d.activeRouletteId as string)
     : (roulettes[0]?.id ?? null);
-  return { version: 1, roulettes, activeRouletteId, sidebarOpen: d.sidebarOpen !== false, muted: d.muted === true };
+  return {
+    version: 1,
+    roulettes,
+    activeRouletteId,
+    sidebarOpen: d.sidebarOpen !== false,
+    muted: d.muted === true,
+    spinSeconds: clampSpinSeconds(typeof d.spinSeconds === "number" ? d.spinSeconds : MIN_SPIN_SECONDS),
+  };
 }
 
 /**
@@ -77,6 +94,10 @@ export class Store {
     return this.data.muted;
   }
 
+  get spinSeconds(): number {
+    return this.data.spinSeconds;
+  }
+
   imageUrl(name: string | null): string | null {
     return name ? api.imageSrc(this.imagesDir, name) : null;
   }
@@ -97,6 +118,11 @@ export class Store {
 
   setMuted(muted: boolean) {
     this.data.muted = muted;
+    this.commit();
+  }
+
+  setSpinSeconds(seconds: number) {
+    this.data.spinSeconds = clampSpinSeconds(seconds);
     this.commit();
   }
 

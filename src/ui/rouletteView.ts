@@ -1,5 +1,5 @@
 import { buildSpinPlan, playSpin, randomInt } from "../roulette";
-import { SPIN_DURATION_MS, type SoundPlayer } from "../sound";
+import { MIN_SPIN_SECONDS, type SoundPlayer } from "../sound";
 import type { Item } from "../types";
 import { createPlaceholder } from "./placeholder";
 
@@ -26,6 +26,8 @@ export class RouletteView {
   private shown: HTMLElement;
   private spinning = false;
   private tooFewHint = TOO_FEW_ITEMS_HINT;
+  /** Length of the next spin; read when a spin starts. */
+  spinSeconds = MIN_SPIN_SECONDS;
 
   constructor(
     root: HTMLElement,
@@ -106,8 +108,9 @@ export class RouletteView {
 
     // The winner is decided here, before anything moves; the animation only stages it.
     const winner = randomInt(this.items.length);
-    this.sound.startSpin();
-    const plan = buildSpinPlan(this.items.length, winner, SPIN_DURATION_MS + this.sound.latencyMs);
+    const seconds = this.spinSeconds;
+    this.sound.startSpin(seconds);
+    const plan = buildSpinPlan(this.items.length, winner, seconds * 1000 + this.sound.latencyMs);
 
     await playSpin(plan, (index, gap) => {
       this.showFace(this.itemFaces[index]);

@@ -75,8 +75,8 @@ button:disabled {
 }
 
 .stage {
-  /* Display size of the 960px background tile. */
-  --tile: 720px;
+  /* The 116px pixel-art tile shown at 4 screen pixels per art pixel. */
+  --tile: 464px;
   position: relative;
   flex: 1;
   min-width: 0;
@@ -86,26 +86,35 @@ button:disabled {
   justify-content: center;
   background: #000;
   overflow: hidden;
+  /* Lets the backdrop size itself from the stage's width + height. */
+  container-type: size;
 }
 
-/* Power-up icons drifting up and to the right. The layer is one tile larger than the
-   stage and moves exactly one tile per loop, so the repeat is seamless. */
+/* Pixel-art icons tilted 45° to the left, drifting up and to the right. The square layer
+   covers the stage at that angle with a tile to spare, and slides one tile along its own
+   x axis per loop (which is up-right on screen), so the repeat is seamless. */
 .stage-backdrop {
+  --cover: calc((100cqw + 100cqh) * 0.7072 + 2 * var(--tile));
   position: absolute;
-  top: 0;
-  left: calc(-1 * var(--tile));
-  width: calc(100% + var(--tile));
-  height: calc(100% + var(--tile));
-  background: url("./assets/powerups-tile.png") 0 0 / var(--tile) var(--tile) repeat;
+  left: calc(50% - var(--cover) / 2);
+  top: calc(50% - var(--cover) / 2);
+  width: var(--cover);
+  height: var(--cover);
+  background: url("./assets/pixel-tile.png") 0 0 / var(--tile) var(--tile) repeat;
+  image-rendering: pixelated;
   opacity: 0.25;
   pointer-events: none;
+  transform: rotate(-45deg);
   animation: backdrop-drift 45s linear infinite;
   will-change: transform;
 }
 
 @keyframes backdrop-drift {
+  from {
+    transform: rotate(-45deg) translateX(0);
+  }
   to {
-    transform: translate(var(--tile), calc(-1 * var(--tile)));
+    transform: rotate(-45deg) translateX(var(--tile));
   }
 }
 
@@ -502,7 +511,7 @@ button:disabled {
 
 .item-box {
   position: relative;
-  width: min(520px, 80%, calc((100vh - 330px) * 4 / 3));
+  width: min(520px, 80%, calc((100vh - 370px) * 4 / 3));
   aspect-ratio: 4 / 3;
   background: #000;
   border: 14px solid #fff;
@@ -644,6 +653,37 @@ button:disabled {
   min-height: 1.2em;
   color: var(--muted-text);
   font-size: 0.9rem;
+}
+
+.duration-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: -8px;
+  padding: 6px 14px;
+  border: 1px solid #24242e;
+  border-radius: 999px;
+  background: rgb(16 16 20 / 0.85);
+  color: var(--muted-text);
+  font-size: 0.85rem;
+}
+
+.duration-input {
+  width: 160px;
+  accent-color: var(--gold);
+  cursor: pointer;
+}
+
+.duration-input:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.duration-value {
+  min-width: 3.6em;
+  color: #f2f2f2;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
 }
 
 /* ---------- Animations ---------- */

@@ -1,5 +1,5 @@
 import * as api from "./api";
-import { SoundPlayer } from "./sound";
+import { MAX_SPIN_SECONDS, MIN_SPIN_SECONDS, SoundPlayer } from "./sound";
 import { Store } from "./store";
 import { confirmDialog, itemDialog, nameDialog, type ItemDialogDeps } from "./ui/dialogs";
 import { icons } from "./ui/icons";
@@ -19,6 +19,11 @@ app.innerHTML = `
       <div class="stage-content">
         <h1 class="roulette-title"></h1>
         <section class="roulette"></section>
+        <label class="duration-control">
+          <span>Duración del giro</span>
+          <input class="duration-input" type="range" min="${MIN_SPIN_SECONDS}" max="${MAX_SPIN_SECONDS}" step="0.5" />
+          <output class="duration-value"></output>
+        </label>
       </div>
     </main>
   </div>
@@ -30,6 +35,8 @@ const sidebarEl = app.querySelector<HTMLElement>(".sidebar")!;
 const title = app.querySelector<HTMLElement>(".roulette-title")!;
 const toggleButton = app.querySelector<HTMLButtonElement>(".sidebar-toggle")!;
 const muteButton = app.querySelector<HTMLButtonElement>(".mute-button")!;
+const durationInput = app.querySelector<HTMLInputElement>(".duration-input")!;
+const durationValue = app.querySelector<HTMLOutputElement>(".duration-value")!;
 const toast = app.querySelector<HTMLElement>(".toast")!;
 
 let toastTimer: number | undefined;
@@ -58,9 +65,18 @@ const view = new RouletteView(
   (item) => store.imageUrl(item.image),
   (isSpinning) => {
     spinning = isSpinning;
+    durationInput.disabled = isSpinning;
     updateSidebarAccess();
   },
 );
+
+const formatSeconds = (s: number) => `${s.toFixed(1).replace(".", ",")} s`;
+// Live preview while dragging; saved once the slider is released.
+durationInput.addEventListener("input", () => {
+  view.spinSeconds = durationInput.valueAsNumber;
+  durationValue.textContent = formatSeconds(durationInput.valueAsNumber);
+});
+durationInput.addEventListener("change", () => store.setSpinSeconds(durationInput.valueAsNumber));
 
 const itemDeps: ItemDialogDeps = {
   imageUrl: (name) => store.imageUrl(name),
@@ -138,6 +154,10 @@ function render() {
   muteButton.title = store.muted ? "Activar sonido" : "Silenciar";
   muteButton.setAttribute("aria-pressed", String(store.muted));
   sound.setMuted(store.muted);
+
+  durationInput.value = String(store.spinSeconds);
+  durationValue.textContent = formatSeconds(store.spinSeconds);
+  view.spinSeconds = store.spinSeconds;
 
   updateSidebarAccess();
   sidebar.render();
